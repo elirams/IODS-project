@@ -6,3 +6,4 @@ This course give as a general overview over the possibilities to work with data.
 The core values of the course are based on the importance of open data and knowledge sharing.
 
 *Link to GitHub repository:* <https://github.com/elirams/IODS-project>
+
