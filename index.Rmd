@@ -3,7 +3,7 @@ title: "IODS course project"
 author: "Elisabet Rams"
 output:
   html_document:
-    theme: lumen
+    theme: sandstone
     toc: true
     toc_depth: 2
     fig_caption: true
