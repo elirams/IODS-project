@@ -1,13 +1,10 @@
-# Regression and model validation
+# Chapter 2. Regression and model validation
 
-*Describe the work you have done this week and summarize your learning.*
+In this chapter we will go through how to read, interpret and represent data. Then we will learn how to apply and interpret simple and multiple regressions. And finally we will go through the most important methods to validate regression models.
 
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using  
+### 2.1. Data structure and dimensions
 
-#### 1. First we will read the data called students2014, explore its structure and dimensions:
-
+First we will read the data called students2014, explore its structure and dimensions:
 
 ```{r read}
 learning2014<-read.csv("C:/Users/Elisabet/Desktop/ELI/MASTER'S DEGREE/Open Data Science/GitHub/IODS-project/IODS-project/learning2014.csv", header = TRUE)
@@ -24,26 +21,27 @@ str(learning2014)
 
 We can see the our data has 7 variables (columns), and 166 observations. The data is about the different approaches of learning by students. The variables measured are:
 
-**gender:** It has 2 levels: M for male, F for female
+**Gender:** It has 2 levels: M for male, F for female
 
-**age:** age of the students. Integral data type variable with a minimum age of 17y.o. and maximum of 55 y.o.
+**Age:** age of the students. Integral data type variable.
 
-**attitude:** global attitude towards statistics
+**Attitude:** global attitude towards statistics.
 
-**deep:** stands for deep approach learning and it is a combination of variables including: seeking meaning, relating ideas and use of evidence.  
+**Deep:** stands for deep approach learning and it is a combination of variables including: seeking meaning, relating ideas and use of evidence. This variables measure sto what extent the student has the intention to maximize understanding, with a true commitment to learning.
 
-**stra:** stands for strategic approach and it is a combination of variables including: organized studying and time management.
+**Stra:** stands for strategic approach and it is a combination of variables including: organized studying and time management. This variables  measures to what extent the students organize their studying
 
-**surf:** stands for surface approach learning and it is a combination of variables including: lack of purpose, unrelated memorising and syllabus-boundness.
+**Surf:** stands for surface approach learning and it is a combination of variables including: lack of purpose, unrelated memorising and syllabus-boundness.This variable measures to what extent the student memorizes without understanding, with a serious lack of personal engagement in the learning process.
 
-**points:** the exam points that students obtained. It is an integral data type with a minimum points of 7 and maximum of 33.
+**Points:** the exam points that students obtained. It is an integral data type. The maximum points that student could get in the exam is 30 plus some extra points from participating in the study, and the minimum points for passing is 12.
 
-The variables attitude, deep, stra and surf are numerical data type with ranging values from 1 to 5.
+The variables attitude, deep, stra and surf are numerical data type with ranging values from 1 to 5. 1 meaning that the student is very far from one specific approach and 5 that the student is very close to that approach.
 
 
-#### 2. Second, we will do a graphical overview of the data and show the summaries of the variables:
 
-##### First we install the packages and bring them to R studio:
+### 2.2. Data graphical overview and summaries
+
+We will do a graphical overview of the data and show the summaries of the variables, but first we install the packages and bring them to R studio:
 
 ```{r install}
 
@@ -56,10 +54,78 @@ library(GGally)
 summary(learning2014)
 ```
 
-
+For the graphical overview of the data we will use ggpairs plot from GGally package (which is an extension of the ggplot2), because it is a more advance plot which show us at the same the distribution of the data as well as the relationships between variables. It creates scatter plots and give the correlation value. We specify the combo argument in the lower list because we have both discrete and continuous variables. Mapping describes the aesthetic parameters and in this case we specify to colour male and female.
 
 ```{r ggpairs}
 p <- ggpairs(learning2014, mapping = aes(col=gender), lower=list(combo=wrap("facethist", bins=20)))
 
 p
 ```
+
+On the summary of our data we can observe how the variables are distributed.For gender, we have 110 female and 56 male. The average age of respondants is 25.5, with a minimum age of 17 and a maximum of 55 years old. Most of the respondants have ages from 21 to 27 years old. The mean attitude towards statistics is 3.1, women has higher mean attitude than men. Mean deep approach is 3.6 and there is no big differences between men and women. Strategic approach has a mean of 3.1, and woman has slightly higher points. Surface approach learning has a mean of 2.7 and there is no significant differences between men and woman. The average exam points is 22.7, lowest points is 7 and maximum is 33.
+
+With the ggpairs plot we can see graphically the distribution of the variables in the middle diagonal line, sepparated for men (blue) and women (pink). We can also see on the top row a box plot showing the median, first and third quartile for each of the variables. On the left side we have the scatter plots and on the right side the correlations values. We can observe that the variables with clearly higher correlations is attitude with points, with 0.44. Then exam points are also slightly related with strategic and surface approach with 0.15 and 0.14 correlation, respectively.
+
+
+
+### 2.3. Regression model:
+
+Now we choose three variables as explanatory variables of the target variable (dependent) which is the exam points. Based on the correlation values, we will choose as explanatory variables: attitude, stra and surf.
+
+First we write the model, since we have more than one variable it is a multiple regression with the formula like y ~ x1 + x2 + x3.
+
+```{r model}
+my_model <- lm(points ~ attitude + stra + surf, data=learning2014)
+```
+Let's look at the summary of our model:
+
+```{r summary model}
+summary(my_model)
+```
+On the output we see a table where the first column shows the estimation of each of the coefficients or parameters of the model, then the standard error for these estimations. Finally the T-test value and the p-value to accept or reject the nulle hypothesis. Based on the results, the only variable with p-value close enough to zero to conclude that the nulle hypothesis is false and therefore affirm that there is statistical relationship between variables, is attitude. Therefore stra and surf are not statistically related to points. 
+
+We will then rewrite the model including only attitude as the explanatory variable:
+
+```{r model2}
+my_model2 <- lm(points ~ attitude, data = learning2014)
+summary(my_model2)
+```
+So our final model now looks like this:
+
+y = points    X = attitude
+
+$$y = 11.6 + 3.5x$$       
+$$y = A + Bx$$
+
+A is the point where the regression line intercepts the Y axis and B is the slope of the regression and it shows the relationship between x and y. So in this case when attitude increases one unit, the points increases 3.5 units. Based on what we have previously explained, we can see that there is statistical significance to say that attitude is related to points. 
+
+The multiple R squared of the model measure the amount of variation in the target variable that can be explained by the explanatory variables. In this case then, the variable attitude explains 19% of the variation in exam points.
+
+
+
+### 2.4. Model validation (diagnostic plots):
+
+The model assumes that the residuals (difference between predicted values and real values) have a constant variance, so that they don't depend on the explanatory variable. In the following plot we can see how points are really randomly distributed, so that they don't follow any pattern. For this reason we can say that the assumption is reasonable. 
+
+#### Residuals vs Fitted values
+
+```{r res vs fit}
+plot(my_model2, which = 1)
+```
+
+#### Normal QQ-plot 
+
+The model assumes that the residuals are normally distributed. With the following plot we can prove if that assumption is correct. In this case, we can see how the points fall pretty well into the line for almost all values, therefore we can say that the normality assumption is reasonable.
+
+```{r normal QQ}
+plot(my_model2, which = 2)
+```
+
+#### Residuals vs Leverage
+
+Finally, in this plot we can identify if there is single observations which have an unusually high impact in the model. If there exists some single observations which differs so much from the rest, we say that it has high leverage. In this case, we can see how the leverage of the points is similar, there is no single points which have much higher leverage than the others. Therefore, we have regular leverage and that gives more validity to our model.
+
+```{r res vs lev}
+plot(my_model2, which = 5)
+```
+
