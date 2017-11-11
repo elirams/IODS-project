@@ -7,10 +7,10 @@
 - Assume the reader has no previous knowledge of your data or the more advanced methods you are using  
 
 #### 1. First we will read the data called students2014, explore its structure and dimensions:
-new.env
+
 
 ```{r read}
-learning2014<-read.csv("C:/Open_Data_Science/GitHub/IODS-project/IODS-project/learning2014.csv", header = TRUE)
+learning2014<-read.csv("C:/Users/Elisabet/Desktop/ELI/MASTER'S DEGREE/Open Data Science/GitHub/IODS-project/IODS-project/learning2014.csv", header = TRUE)
 ```
 
 ```{r dim}
@@ -45,10 +45,12 @@ The variables attitude, deep, stra and surf are numerical data type with ranging
 
 ##### First we install the packages and bring them to R studio:
 
-`install.packages("ggplot2")`
-`library(ggplot2)`
-`install.packages("GGally")`
-`library(GGally)`
+```{r install}
+
+library(ggplot2)
+
+library(GGally)
+```
 
 ```{r summary}
 summary(learning2014)

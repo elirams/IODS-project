@@ -63,7 +63,7 @@ colnames(learning2014)
 dim(learning2014)
 
 # Set IODSproject folder to the working directory:
-setwd("C:/Users/Elisabet/Desktop/ELI/MASTER'S DEGREE/Open Data Science/GitHub/IODS-project")
+setwd("C:/Users/Elisabet/Desktop/ELI/MASTER'S DEGREE/Open Data Science/GitHub/IODS-project/IODS-project")
 
 # Save the analysis datset to the data folder:
 
