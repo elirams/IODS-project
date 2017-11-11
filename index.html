@@ -141,7 +141,7 @@ $(document).ready(function () {
 <div id="TOC">
 <ul>
 <li><a href="#about-the-project">About the project</a></li>
-<li><a href="#insert-chapter-2-title-here">Insert chapter 2 title here</a></li>
+<li><a href="#regression-and-model-validation">Regression and model validation</a></li>
 </ul>
 </div>
 
@@ -153,15 +153,27 @@ $(document).ready(function () {
 <p><em>Link to GitHub repository:</em> <a href="https://github.com/elirams/IODS-project" class="uri">https://github.com/elirams/IODS-project</a></p>
 <hr />
 </div>
-<div id="insert-chapter-2-title-here" class="section level1">
-<h1>Insert chapter 2 title here</h1>
+<div id="regression-and-model-validation" class="section level1">
+<h1>Regression and model validation</h1>
 <p><em>Describe the work you have done this week and summarize your learning.</em></p>
 <ul>
 <li>Describe your work and results clearly.</li>
 <li>Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods</li>
 <li>Assume the reader has no previous knowledge of your data or the more advanced methods you are using</li>
 </ul>
+<div id="first-we-will-read-the-data-called-students2014-explore-its-structure-and-dimensions" class="section level3">
+<h3>First we will read the data called students2014, explore its structure and dimensions:</h3>
+<p>read.csv(“learning2014.csv”, header = TRUE) dim(learning2014) str(learning2014) summary(learning2014<span class="math inline">\(attitude) summary(learning2014\)</span>age) summary(learning2014$points)</p>
+<p>We can see the our data has 7 variables (columns), and 166 observations. The data is about the different approaches of learning by students. The variables measured are:</p>
+<p><strong>1. age:</strong> age of the students. Integral data type variable with a minimum age of 17y.o. and maximum of 55 y.o. <strong>2. attitude:</strong> global attitude towards statistics <strong>3. points:</strong> the exam points that students obtained. It is an integral data type with a minimum points of 7 and maximum of 33. <strong>4. gender:</strong> It has 2 levels: M for male, F for female <strong>5. deep:</strong> stands for deep approach learning and it is a combination of variables including: seeking meaning, relating ideas and use of evidence.<br />
+<strong>6. stra:</strong> stands for strategic approach and it is a combination of variables including: organized studying and time management. <strong>7. surf:</strong> stands for surface approach learning and it is a combination of variables including: lack of purpose, unrelated memorising and syllabus-boundness.</p>
+<p>The variables attitude, deep, stra and surf are numerical data type with ranging values from 1 to 5.</p>
+</div>
+<div id="second-we-will-do-a-graphical-overview-of-the-data-and-show-the-summaries-of-the-variables" class="section level3">
+<h3>Second, we will do a graphical overview of the data and show the summaries of the variables:</h3>
+<p>summary(learning2014)</p>
 <hr />
+</div>
 </div>
 
 

@@ -1,7 +1,63 @@
-# Insert chapter 2 title here
+# Regression and model validation
 
 *Describe the work you have done this week and summarize your learning.*
 
 - Describe your work and results clearly. 
 - Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods
 - Assume the reader has no previous knowledge of your data or the more advanced methods you are using  
+
+#### 1. First we will read the data called students2014, explore its structure and dimensions:
+new.env
+
+```{r read}
+learning2014<-read.csv("C:/Open_Data_Science/GitHub/IODS-project/IODS-project/learning2014.csv", header = TRUE)
+```
+
+```{r dim}
+dim(learning2014)
+```
+
+```{r str}
+str(learning2014)
+```
+
+
+We can see the our data has 7 variables (columns), and 166 observations. The data is about the different approaches of learning by students. The variables measured are:
+
+**gender:** It has 2 levels: M for male, F for female
+
+**age:** age of the students. Integral data type variable with a minimum age of 17y.o. and maximum of 55 y.o.
+
+**attitude:** global attitude towards statistics
+
+**deep:** stands for deep approach learning and it is a combination of variables including: seeking meaning, relating ideas and use of evidence.  
+
+**stra:** stands for strategic approach and it is a combination of variables including: organized studying and time management.
+
+**surf:** stands for surface approach learning and it is a combination of variables including: lack of purpose, unrelated memorising and syllabus-boundness.
+
+**points:** the exam points that students obtained. It is an integral data type with a minimum points of 7 and maximum of 33.
+
+The variables attitude, deep, stra and surf are numerical data type with ranging values from 1 to 5.
+
+
+#### 2. Second, we will do a graphical overview of the data and show the summaries of the variables:
+
+##### First we install the packages and bring them to R studio:
+
+`install.packages("ggplot2")`
+`library(ggplot2)`
+`install.packages("GGally")`
+`library(GGally)`
+
+```{r summary}
+summary(learning2014)
+```
+
+
+
+```{r ggpairs}
+p <- ggpairs(learning2014, mapping = aes(col=gender), lower=list(combo=wrap("facethist", bins=20)))
+
+p
+```

@@ -56,14 +56,14 @@ dim(learning2014)
 # I want to keep the name so first I will change the name of the dataset that we have now
 
 learning2014_original <- learning2014
-learning2014 <- subset(learning2014_original, select = c(age, attitude, points, gender, deep, stra, surf))
+learning2014 <- subset(learning2014_original, select = c(gender, age, attitude, deep, stra, surf, points))
 colnames(learning2014)
 
 # Now we ave the right dimensions, 166 observations and 7 variables.
 dim(learning2014)
 
 # Set IODSproject folder to the working directory:
-setwd("C:/Open_Data_Science/GitHub/IODS-project")
+setwd("C:/Users/Elisabet/Desktop/ELI/MASTER'S DEGREE/Open Data Science/GitHub/IODS-project")
 
 # Save the analysis datset to the data folder:
 
