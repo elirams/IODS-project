@@ -1,5 +1,5 @@
 
-# About the project
+# Chapter 1. About the project
 
 This course give as a general overview over the possibilities to work with data. No matter the topic, all scientists need to work with lots of data, organize it and analyze it in order to be able to understand it, explain it and represent it. This course will give us the basic tools to do so. Mainly working with R programming language and R-studio software which are probably the most widely used open source tools thanks to its robustness for statistical computing and graphics.
 
