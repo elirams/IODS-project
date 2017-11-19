@@ -1,0 +1,369 @@
+# Chapter 3. Logistic regression
+
+In this chapter we will analyse the relationships between the target variable, high/low alcohol consumption, and other variables. Because the target variable is discrete (2 values, TRUE or FALSE), we will use logistic regressions in order to do it.
+
+
+### 3.1. Reading and describing the data
+
+We obtained the original data from the Machine Learning Repository. It is a combination of 2 data sets, student performance in mathematics and in portuguese, from the Student Performance Data Set. It contains 35 variables and 382 observations for each one of them. 
+
+We have information about the students and its background, such as sex, age, family size, parents' education, parents'job, etc.
+
+It also contains information about the students' grades, the most rellevant is G3 which relates to the final grades. 
+
+Because in this exercise we are interested in studying the high consumption of alcohol among students, we created a variable called "alcohol use" (alc_use), which is the average alcohol consumption of the week and the weekend. 
+
+Finally we created the variable that we will use as target variable in this exercise, which is "high alcohol consumption"" (high_use). This variable is TRUE for "alcohol use" higher than 2 and FALSE otherwise.
+
+For further information about the variables you can check [here] (https://archive.ics.uci.edu/ml/datasets/Student+Performance):
+
+
+```{r read}
+alc <- read.table("C:/Users/Elisabet/Desktop/ELI/MASTER'S DEGREE/Open Data Science/GitHub/IODS-project/IODS-project/alc.csv", header = TRUE, sep = ",")
+glimpse(alc)
+```
+
+
+### 3.2 Hypothesis
+
+In order to study the relationships between high alcohol consumption and some other variables, we will choose 4 variables which may have some kind of relationship with the target variable: 
+
+*Failures: number of past class failures. Numeric from 0 to 4. Assuming a positive correlation with the target variable. The more alcohol consumption, the more failures.
+
+*Absences: number of school absences. Numeric from 0 to 93. Also assuming positive correlation, higher alcohol consumption, more absences.
+
+*Final Grades: final grade. Numeric from 0 to 20. Assuming a negative correlation, higher alcohol consumption, lower grades.
+
+*Romantic: if the student is in a romantic relationship. Binary, yes or no. Assuming that students in a romantic relationship are more centered in the relationship and so, they do not go out so much to drink with friends.
+
+
+### 3.3 Describing the distributions of the chosen variables and their relationships with alcohol consumption
+
+
+#### 3.3.1 Bar plots
+
+First we will look at the distribution of our chosen variables with bar plots.
+
+We can see that the target variable, high_use, is distributed so that less than half of the students have actually high alcohol consumption rates.
+Absences are quite sparsely distributed with many students with very low amount of absences but also many students with high amount of absences.
+The failures figures speaks by itself, the vast majority of students have not failed any class in the past.
+The grades are fairly sparsely distributed but there is higher amount of students with lower grades.
+Finally we can see that a bit less than half of the students are in a romantic relationship.
+
+
+
+```{r gather + bar plot}
+chosen_variables <- subset(alc, select = c("high_use", "failures", "absences", "G3", "romantic"))
+
+gather(chosen_variables) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar()
+
+```
+
+With a barplot of high_use and romantic, we can see that proportionality, students in a romantic relationship have less amount of high alcohol consumption.
+
+```{r high_use vs romantic}
+g1 <- ggplot(alc, aes(x = high_use))
+g1 + geom_bar() + facet_wrap("romantic")
+```
+
+
+
+#### 3.3.2 Box plots
+
+
+Next we will draw some box plots with high_use as the dependent variable and failures, absences, grades and romantic as the dependent ones.
+
+For the first one, with high use vs grades, we also check the differences between males and females. 
+
+```{r boxplot1}
+
+g1 <- ggplot(alc, aes(x= high_use, y = G3, col = sex))
+g1 + geom_boxplot() + ylab("Grades") + ggtitle("Grades by alcohol consumption and sex")
+```
+
+In the second one we can actually observe that those in a relationship have more absences, but most important, it supports our hypothesis that students with high alcohol consumption have more absences.
+
+```{r boxplot2}
+g2 <- ggplot(alc, aes(x= high_use, y = absences, col = romantic))
+g2 + geom_boxplot() + ylab("Absences") + ggtitle("Absences by alcohol consumption and relationship")
+```
+
+This last graph is quite surprising, seeing that the only significant relationship is with students in a relationship and failures. We don't see a relationship between failures and high/low alcohol consumption as we hypothesized. Most probably due the fact that failures variable was so skewed to 0 failures. 
+
+```{r boxplot3}
+g3 <- ggplot(alc, aes(x= high_use, y = failures, col = romantic))
+g3 + geom_boxplot() + ylab("Failures") + ggtitle("Failures by alcohol consumption and relationship")
+```
+
+#### 3.3.3 Cross-tabulation
+
+We can also look at the differences nummerically. 
+
+First comparing target variable with final grades. We see that students with higher alcohol consumption have lower mean final grades, which supports our hypothesis.
+
+```{r summarise1}
+alc %>% group_by (high_use) %>% summarise (count = n(), mean_grade = mean (G3))
+```
+
+We can also count how many of the students in a relationship or not have high/low alcohol consumption. And see the mean grades for each combination. The results support our initial hypothesis and confirm numerically what we could see on the previous graph. Proportionally, students with boyfriend/girlfriend has lower alcohol consumption (**27%** = 33/(33+88)) than those without (**31%** = 81/(180+81)).
+
+Again we can see that students with high alcohol consumption have lower grades. And it is actually funny to see that students in a relationship have also lower grades, but that is not rellevant in our study.
+
+```{r summarise2}
+alc %>% group_by (romantic, high_use) %>% summarise (count = n(), mean_grade = mean (G3))
+```
+
+In the next table we can see how high alcohol consumption has lower mean grades, higher absences and higher failures.
+
+```{r summarise3}
+alc %>% group_by (high_use) %>% summarise (count = n(), mean_grade = mean (G3), mean_absences = mean(absences), mean_failures = mean(failures))
+```
+
+
+If we add to the previous table the romantic variable, we can observe numerically what we have seen on the previous graphs. Students in a romantic relationship have slightly lower grades. Moreover, on the one hand, students with girl/boyfriend have higher absences and failures when they have high alcohol use, but on the other hand , when they have low alcohol use, they have higher absences but lower failures.
+
+
+```{r summarise4}
+alc %>% group_by (high_use, romantic) %>% summarise (count = n(), mean_grade = mean (G3), mean_absences = mean(absences), mean_failures = mean(failures))
+```
+
+### 3.4 Logistic regression
+
+After looking at the data and the possible relationships between variables, now we are going to create a model with the chosen variables, and see if the hypothesis we have are actually statistically confirmed or rejected.
+
+So our model would be:
+
+$$ high-use = romantic + grades + failures + absences $$
+
+The results of the logistic regression clearly shows that we did not choose the most proper variables, because what the previous exploration of the data suggested is not what we see now after applying the regression model. In our model, the only statistically significant variables are absences and failures, leaving romantic and grades out. Most probably choosing romantic as an explanatory variable biased the whole model. So if required, it would be adequate to perform again the regression with different variables and check if we could obtain a better model to explain high/low alcohol consumption.
+
+```{r model}
+m <- glm(high_use ~ romantic + absences + failures + G3, data = alc, family = "binomial")
+
+summary(m)
+
+```
+
+#### Odd ratios and confidence intervals
+
+Next we will interpret the coefficients of the model as odd ratios and provide confidence intervals for them.
+
+The odds ratio quantifies the relationship between X and Y. In this case Y is high alcohol use and X are the explanatory variables used in our model: romantic, absences, failures and grades. 
+
+For example, if we take the X as romantic, the odds ratio measures the odds of having high alcohol consumption when the student is in a relationship divided the odds of having high alcohol consumption when the students is single.
+
+$$OR = odds (Y | X) / Odds (Y | without X )$$
+
+The computational target variable is in logistic regression, the log of the odds. So if we apply exponential function to the fitted values, we will obtain the odds.
+
+So in the OR that we have computed we can observe that Students in a relationship are only 0.7 as likely to be high alcohol consumers than those without. Or in other words, single students are 1.4 times more likely to be high alcohol consumers (to see the odd ratio for "romanticno", we just calculate the inverse, so 0.71^-1 = 1.41).
+
+We must interpret the odds ratio for non-binary variables as the ratio of being high alcohol consumer and one unit of change in variable X, divided by the ratio of being high alcohol consumer and no change in variable X:
+
+$$ exp(coef) = Odds(Y | X+1)/Odds(Y | X) $$
+
+Therefore, with the odds ratio of absences, we can interpret that a student with one more absence is 1.09 more likely to be high alcohol consumer than the student who don't have that one more absence. Of course, with failures, the possible values are more limited (only from 0 to 4), so the change is bigger. The student with one more failure is 1.5 times more likely to be high alcohol consumer than the student without that extra failure.
+
+Grades is the only variable with OR and CI lower than 1, meaning that the correlation is negative. The student having 1 grade higher is 1.05 less likely to be high alcohol consumer than the student without that 1 grade higher, e.g.: the student with grade 4 is 5% less likely to be high alcohol consumer than the one with grade 3.
+
+The confidence intervals shows us where are the vast majority of observations. So for the romantic variable, the CI is very wide, that is why we have not found statistical correlation. For both romantic and G3, the CI go from lower than 1 to higher than 1, so it is unclear if the correlation with target variable is postive or negative, so that is another reason that they cannot be significant. 
+
+Therefore we confirm our hypothesis that high alcohol consumption is positively related to absences and failures. But reject our hypothesis that high alcohol consumption is related anyhow to romantic relationships and grades.
+
+```{r OR}
+# To compute OR (odds ratio) and CI (confidence intervals:
+
+OR <- coef(m) %>% exp()
+CI <- confint(m) %>% exp()
+
+# Print them out:
+cbind(OR, CI)
+```
+
+
+### 3.5 Predictions
+
+Now, we will select only the significant variables (based on the previous logistic regression model) and create a new model to explore the predictive power of our model.
+
+First we write the new model, then we predict the probability of high use based on the response of our model. After we add the probabilities and the predictions to our data set. Predictions would be true only when prob > 0.5. Finally we make a cross tabulation.
+
+On the first table we can observe that for high use consumers, there is only 15 where prediction would be true and 99 false, so in 99 of the cases the prediction said it would not be a high alcohol consumer when in fact it is. We can also observe than in 10 of the cases the model predicted the student to be high alcohol consumer when he/she was not. That shows already the weak prediction power of our model.
+
+On the second table we can see it in percentages, only 3.9% of predictions are true for high alcohol use students and 68% of predictions are true for low alcohol use students. 
+
+To sum up, our model does the right prediction in 71.4% of the cases which is reasonable but could be improved.
+
+```{r new model}
+# We write the new model:
+m2 <- glm(high_use ~ failures + absences, data = alc, family = "binomial")
+
+summary(m2)
+```
+
+```{r prediction}
+# We predict the probability of high_use, based on the response of our model:
+
+probabilities <- predict(m2, type = "response")
+
+# We add the probabilities to our data set:
+
+alc <- mutate(alc, probability = probabilities)
+
+# Now we use these probabilities to make a prediction of high use (the prediction will only be true if probability is higher than 0.5):
+
+alc <- mutate(alc, prediction = probability > 0.5)
+
+# Let's tabulate the predictions versus the actual values:
+
+table(high_use = alc$high_use, prediction = alc$prediction) 
+
+table(high_use = alc$high_use, prediction = alc$prediction) %>% prop.table() %>% addmargins()
+```
+
+We can also draw a plot to see the true values of high_use against the predictions:
+
+```{r plot prediction}
+
+# We can also see it graphically:
+
+g <- ggplot(alc, aes(x=probability, y=high_use, col=prediction))
+
+g + geom_point()
+
+```
+
+Finally, to measure the accuracy of our model, we will compute the total proportion of inaccurately classified individuals (=incorrect predictions in the training data). We will define a loss function for this purpose and then compute the average number of wrong predictions in the training data. We obtained that 0.29 or 29% of predictions are wrong.
+
+The performance of the model is reasonable but one can guess that we could have found a better model for the prediction of high/low alcohol consumers. The simple guessing strategy gave us quite good understanding but still we were wrong for 2 of the 4 variables so, that is questionable.
+
+```{r loss_func}
+loss_func <- function(class, prob){
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+loss_func(class=alc$high_use, prob=alc$probability)
+```
+
+
+### 3.6 Cross-validation
+
+As we have seen, statistical models can be used to make predictions . Cross-validation aims to estimate how accurately a predictive model will perform in practice.
+
+In cross-validation, we calculate the same loss function as before, but with different data than the one used for defining the model (=testing data). Or what is the same, we can calculate the average of wrong predictions in the testing data.
+
+```{r cross-validation}
+
+# 10-fold cross-validation:
+
+cv <- cv.glm(data=alc, cost=loss_func, glmfit = m2, K=10)
+
+# Average number of wrong prediction in the testing data with a 10-fold cross validation:
+
+cv$delta[1]
+```
+
+The average number of wrong predictions in cross validation for my model, is 0.29, which is higher than the error from example model in Datacamp, 0.26. So my model has worse test set performance, as one could have expected at this point of the exercise.
+
+### SUPER BONUS
+
+We can make different logistic regression models and see their performance, looking at the training at testing errors. In the following models we have started with 6 explanatory variables, and every next model we erase the less significant variable.
+
+Looking at the errors, we cannot see any tendency if either having more or less variables improves the model performance.
+
+```{r m3}
+# Model:
+m3 <- glm(high_use ~ sex + failures + absences + G3 + romantic + goout, data = alc, family = "binomial")
+
+summary(m3)
+
+# Adding probability and prediction columns to our data
+probabilities3 <- predict(m3, type = "response")
+alc <- mutate(alc, probability3 = probabilities3)
+alc <- mutate(alc, prediction3 = probability3 > 0.5)
+
+#Training error:
+loss_func(class=alc$high_use, prob=alc$probability3)
+
+#Testing error:
+cv <- cv.glm(data=alc, cost=loss_func, glmfit = m3, K=10)
+cv$delta[1]
+```
+
+```{r m4}
+# Model:
+m4 <- glm(high_use ~ sex + failures + absences + romantic + goout, data = alc, family = "binomial")
+
+summary(m4)
+
+# Adding probability and prediction columns to our data
+probabilities4 <- predict(m4, type = "response")
+alc <- mutate(alc, probability4 = probabilities4)
+alc <- mutate(alc, prediction4 = probability4 > 0.5)
+
+#Training error:
+loss_func(class=alc$high_use, prob=alc$probability4)
+
+#Testing error:
+cv <- cv.glm(data=alc, cost=loss_func, glmfit = m4, K=10)
+cv$delta[1]
+```
+
+
+```{r m5}
+# Model:
+m5 <- glm(high_use ~ sex + failures + absences + goout, data = alc, family = "binomial")
+
+summary(m5)
+
+# Adding probability and prediction columns to our data
+probabilities5 <- predict(m5, type = "response")
+alc <- mutate(alc, probability5 = probabilities5)
+alc <- mutate(alc, prediction5 = probability5 > 0.5)
+
+#Training error:
+loss_func(class=alc$high_use, prob=alc$probability5)
+
+#Testing error:
+cv <- cv.glm(data=alc, cost=loss_func, glmfit = m5, K=10)
+cv$delta[1]
+```
+
+```{r m6}
+# Model:
+m6 <- glm(high_use ~ sex + absences + goout, data = alc, family = "binomial")
+
+summary(m6)
+
+# Adding probability and prediction columns to our data
+probabilities6 <- predict(m6, type = "response")
+alc <- mutate(alc, probability6 = probabilities6)
+alc <- mutate(alc, prediction6 = probability6 > 0.5)
+
+#Training error:
+loss_func(class=alc$high_use, prob=alc$probability6)
+
+#Testing error:
+cv <- cv.glm(data=alc, cost=loss_func, glmfit = m6, K=10)
+cv$delta[1]
+```
+
+```{r m7}
+# Model:
+m7 <- glm(high_use ~ sex + goout, data = alc, family = "binomial")
+
+summary(m7)
+
+# Adding probability and prediction columns to our data
+probabilities7 <- predict(m7, type = "response")
+alc <- mutate(alc, probability7 = probabilities7)
+alc <- mutate(alc, prediction7 = probability7 > 0.5)
+
+#Training error:
+loss_func(class=alc$high_use, prob=alc$probability7)
+
+#Testing error:
+cv <- cv.glm(data=alc, cost=loss_func, glmfit = m7, K=10)
+cv$delta[1]
+```
+
