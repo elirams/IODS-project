@@ -20,6 +20,8 @@ For further information about the variables you can check [here] (https://archiv
 
 ```{r read}
 alc <- read.table("C:/Users/Elisabet/Desktop/ELI/MASTER'S DEGREE/Open Data Science/GitHub/IODS-project/IODS-project/alc.csv", header = TRUE, sep = ",")
+
+library(dplyr)
 glimpse(alc)
 ```
 
@@ -54,7 +56,8 @@ Finally we can see that a bit less than half of the students are in a romantic r
 
 ```{r gather + bar plot}
 chosen_variables <- subset(alc, select = c("high_use", "failures", "absences", "G3", "romantic"))
-
+library(tidyr)
+library(ggplot2)
 gather(chosen_variables) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar()
 
 ```
@@ -255,7 +258,7 @@ In cross-validation, we calculate the same loss function as before, but with dif
 ```{r cross-validation}
 
 # 10-fold cross-validation:
-
+library(boot)
 cv <- cv.glm(data=alc, cost=loss_func, glmfit = m2, K=10)
 
 # Average number of wrong prediction in the testing data with a 10-fold cross validation:
@@ -267,12 +270,12 @@ The average number of wrong predictions in cross validation for my model, is 0.2
 
 ### SUPER BONUS
 
-We can make different logistic regression models and see their performance, looking at the training at testing errors. In the following models we have started with 6 explanatory variables, and every next model we erase the less significant variable.
+We can make different logistic regression models and see their performance, looking at the training at testing errors. In the following models (model 3 to model 7) we have started with 6 explanatory variables, and every next model we erase the less significant variable.
 
 Looking at the errors, we cannot see any tendency if either having more or less variables improves the model performance.
 
 ```{r m3}
-# Model:
+# Model 3, 6 predictors:
 m3 <- glm(high_use ~ sex + failures + absences + G3 + romantic + goout, data = alc, family = "binomial")
 
 summary(m3)
@@ -282,16 +285,16 @@ probabilities3 <- predict(m3, type = "response")
 alc <- mutate(alc, probability3 = probabilities3)
 alc <- mutate(alc, prediction3 = probability3 > 0.5)
 
-#Training error:
+#Training error m3:
 loss_func(class=alc$high_use, prob=alc$probability3)
 
-#Testing error:
+#Testing error m3:
 cv <- cv.glm(data=alc, cost=loss_func, glmfit = m3, K=10)
 cv$delta[1]
 ```
 
 ```{r m4}
-# Model:
+# Model 4, 5 predictors:
 m4 <- glm(high_use ~ sex + failures + absences + romantic + goout, data = alc, family = "binomial")
 
 summary(m4)
@@ -301,17 +304,17 @@ probabilities4 <- predict(m4, type = "response")
 alc <- mutate(alc, probability4 = probabilities4)
 alc <- mutate(alc, prediction4 = probability4 > 0.5)
 
-#Training error:
+#Training error m4:
 loss_func(class=alc$high_use, prob=alc$probability4)
 
-#Testing error:
+#Testing error m4:
 cv <- cv.glm(data=alc, cost=loss_func, glmfit = m4, K=10)
 cv$delta[1]
 ```
 
 
 ```{r m5}
-# Model:
+# Model 5, 4 predictors:
 m5 <- glm(high_use ~ sex + failures + absences + goout, data = alc, family = "binomial")
 
 summary(m5)
@@ -321,16 +324,16 @@ probabilities5 <- predict(m5, type = "response")
 alc <- mutate(alc, probability5 = probabilities5)
 alc <- mutate(alc, prediction5 = probability5 > 0.5)
 
-#Training error:
+#Training error m5:
 loss_func(class=alc$high_use, prob=alc$probability5)
 
-#Testing error:
+#Testing error m5:
 cv <- cv.glm(data=alc, cost=loss_func, glmfit = m5, K=10)
 cv$delta[1]
 ```
 
 ```{r m6}
-# Model:
+# Model 6, 3 predictors:
 m6 <- glm(high_use ~ sex + absences + goout, data = alc, family = "binomial")
 
 summary(m6)
@@ -340,16 +343,16 @@ probabilities6 <- predict(m6, type = "response")
 alc <- mutate(alc, probability6 = probabilities6)
 alc <- mutate(alc, prediction6 = probability6 > 0.5)
 
-#Training error:
+#Training error m6:
 loss_func(class=alc$high_use, prob=alc$probability6)
 
-#Testing error:
+#Testing error m6:
 cv <- cv.glm(data=alc, cost=loss_func, glmfit = m6, K=10)
 cv$delta[1]
 ```
 
 ```{r m7}
-# Model:
+# Model 7, 2 predictors:
 m7 <- glm(high_use ~ sex + goout, data = alc, family = "binomial")
 
 summary(m7)
@@ -359,10 +362,10 @@ probabilities7 <- predict(m7, type = "response")
 alc <- mutate(alc, probability7 = probabilities7)
 alc <- mutate(alc, prediction7 = probability7 > 0.5)
 
-#Training error:
+#Training error m7:
 loss_func(class=alc$high_use, prob=alc$probability7)
 
-#Testing error:
+#Testing error m7:
 cv <- cv.glm(data=alc, cost=loss_func, glmfit = m7, K=10)
 cv$delta[1]
 ```
