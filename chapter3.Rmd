@@ -15,10 +15,10 @@ Because in this exercise we are interested in studying the high consumption of a
 
 Finally we created the variable that we will use as target variable in this exercise, which is "high alcohol consumption"" (high_use). This variable is TRUE for "alcohol use" higher than 2 and FALSE otherwise.
 
-For further information about the variables you can check [here] (https://archive.ics.uci.edu/ml/datasets/Student+Performance):
+For further information about the variables you can check: https://archive.ics.uci.edu/ml/datasets/Student+Performance
 
 
-```{r read}
+```{r read alc}
 alc <- read.table("C:/Users/Elisabet/Desktop/ELI/MASTER'S DEGREE/Open Data Science/GitHub/IODS-project/IODS-project/alc.csv", header = TRUE, sep = ",")
 
 library(dplyr)
@@ -140,7 +140,7 @@ $$ high-use = romantic + grades + failures + absences $$
 
 The results of the logistic regression clearly shows that we did not choose the most proper variables, because what the previous exploration of the data suggested is not what we see now after applying the regression model. In our model, the only statistically significant variables are absences and failures, leaving romantic and grades out. Most probably choosing romantic as an explanatory variable biased the whole model. So if required, it would be adequate to perform again the regression with different variables and check if we could obtain a better model to explain high/low alcohol consumption.
 
-```{r model}
+```{r logistic model}
 m <- glm(high_use ~ romantic + absences + failures + G3, data = alc, family = "binomial")
 
 summary(m)
@@ -274,6 +274,7 @@ We can make different logistic regression models and see their performance, look
 
 Looking at the errors, we cannot see any tendency if either having more or less variables improves the model performance.
 
+**Model 3 (6 predictors):**
 ```{r m3}
 # Model 3, 6 predictors:
 m3 <- glm(high_use ~ sex + failures + absences + G3 + romantic + goout, data = alc, family = "binomial")
@@ -293,6 +294,8 @@ cv <- cv.glm(data=alc, cost=loss_func, glmfit = m3, K=10)
 cv$delta[1]
 ```
 
+
+**Model 4 (5 predictors):**
 ```{r m4}
 # Model 4, 5 predictors:
 m4 <- glm(high_use ~ sex + failures + absences + romantic + goout, data = alc, family = "binomial")
@@ -313,6 +316,7 @@ cv$delta[1]
 ```
 
 
+**Model 5 (4 predictors):**
 ```{r m5}
 # Model 5, 4 predictors:
 m5 <- glm(high_use ~ sex + failures + absences + goout, data = alc, family = "binomial")
@@ -332,6 +336,8 @@ cv <- cv.glm(data=alc, cost=loss_func, glmfit = m5, K=10)
 cv$delta[1]
 ```
 
+
+**Model 6 (3 predictors):**
 ```{r m6}
 # Model 6, 3 predictors:
 m6 <- glm(high_use ~ sex + absences + goout, data = alc, family = "binomial")
@@ -351,6 +357,8 @@ cv <- cv.glm(data=alc, cost=loss_func, glmfit = m6, K=10)
 cv$delta[1]
 ```
 
+
+**Model 7 (2 predictors):**
 ```{r m7}
 # Model 7, 2 predictors:
 m7 <- glm(high_use ~ sex + goout, data = alc, family = "binomial")

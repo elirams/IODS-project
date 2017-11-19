@@ -129,7 +129,7 @@ $(document).ready(function () {
 <p>It also contains information about the students’ grades, the most rellevant is G3 which relates to the final grades.</p>
 <p>Because in this exercise we are interested in studying the high consumption of alcohol among students, we created a variable called “alcohol use” (alc_use), which is the average alcohol consumption of the week and the weekend.</p>
 <p>Finally we created the variable that we will use as target variable in this exercise, which is “high alcohol consumption”&quot; (high_use). This variable is TRUE for “alcohol use” higher than 2 and FALSE otherwise.</p>
-<p>For further information about the variables you can check [here] (<a href="https://archive.ics.uci.edu/ml/datasets/Student+Performance" class="uri">https://archive.ics.uci.edu/ml/datasets/Student+Performance</a>):</p>
+<p>For further information about the variables you can check: <a href="https://archive.ics.uci.edu/ml/datasets/Student+Performance" class="uri">https://archive.ics.uci.edu/ml/datasets/Student+Performance</a></p>
 <pre class="r"><code>alc &lt;- read.table(&quot;C:/Users/Elisabet/Desktop/ELI/MASTER'S DEGREE/Open Data Science/GitHub/IODS-project/IODS-project/alc.csv&quot;, header = TRUE, sep = &quot;,&quot;)
 
 library(dplyr)</code></pre>
@@ -414,13 +414,14 @@ cv &lt;- cv.glm(data=alc, cost=loss_func, glmfit = m2, K=10)
 # Average number of wrong prediction in the testing data with a 10-fold cross validation:
 
 cv$delta[1]</code></pre>
-<pre><code>## [1] 0.2905759</code></pre>
+<pre><code>## [1] 0.2879581</code></pre>
 <p>The average number of wrong predictions in cross validation for my model, is 0.29, which is higher than the error from example model in Datacamp, 0.26. So my model has worse test set performance, as one could have expected at this point of the exercise.</p>
 </div>
 <div id="super-bonus" class="section level3">
 <h3>SUPER BONUS</h3>
 <p>We can make different logistic regression models and see their performance, looking at the training at testing errors. In the following models (model 3 to model 7) we have started with 6 explanatory variables, and every next model we erase the less significant variable.</p>
 <p>Looking at the errors, we cannot see any tendency if either having more or less variables improves the model performance.</p>
+<p><strong>Model 3 (6 predictors):</strong></p>
 <pre class="r"><code># Model 3, 6 predictors:
 m3 &lt;- glm(high_use ~ sex + failures + absences + G3 + romantic + goout, data = alc, family = &quot;binomial&quot;)
 
@@ -464,7 +465,8 @@ loss_func(class=alc$high_use, prob=alc$probability3)</code></pre>
 <pre class="r"><code>#Testing error m3:
 cv &lt;- cv.glm(data=alc, cost=loss_func, glmfit = m3, K=10)
 cv$delta[1]</code></pre>
-<pre><code>## [1] 0.2041885</code></pre>
+<pre><code>## [1] 0.2172775</code></pre>
+<p><strong>Model 4 (5 predictors):</strong></p>
 <pre class="r"><code># Model 4, 5 predictors:
 m4 &lt;- glm(high_use ~ sex + failures + absences + romantic + goout, data = alc, family = &quot;binomial&quot;)
 
@@ -507,7 +509,8 @@ loss_func(class=alc$high_use, prob=alc$probability4)</code></pre>
 <pre class="r"><code>#Testing error m4:
 cv &lt;- cv.glm(data=alc, cost=loss_func, glmfit = m4, K=10)
 cv$delta[1]</code></pre>
-<pre><code>## [1] 0.2146597</code></pre>
+<pre><code>## [1] 0.2198953</code></pre>
+<p><strong>Model 5 (4 predictors):</strong></p>
 <pre class="r"><code># Model 5, 4 predictors:
 m5 &lt;- glm(high_use ~ sex + failures + absences + goout, data = alc, family = &quot;binomial&quot;)
 
@@ -549,7 +552,8 @@ loss_func(class=alc$high_use, prob=alc$probability5)</code></pre>
 <pre class="r"><code>#Testing error m5:
 cv &lt;- cv.glm(data=alc, cost=loss_func, glmfit = m5, K=10)
 cv$delta[1]</code></pre>
-<pre><code>## [1] 0.2146597</code></pre>
+<pre><code>## [1] 0.2225131</code></pre>
+<p><strong>Model 6 (3 predictors):</strong></p>
 <pre class="r"><code># Model 6, 3 predictors:
 m6 &lt;- glm(high_use ~ sex + absences + goout, data = alc, family = &quot;binomial&quot;)
 
@@ -590,7 +594,8 @@ loss_func(class=alc$high_use, prob=alc$probability6)</code></pre>
 <pre class="r"><code>#Testing error m6:
 cv &lt;- cv.glm(data=alc, cost=loss_func, glmfit = m6, K=10)
 cv$delta[1]</code></pre>
-<pre><code>## [1] 0.2146597</code></pre>
+<pre><code>## [1] 0.2120419</code></pre>
+<p><strong>Model 7 (2 predictors):</strong></p>
 <pre class="r"><code># Model 7, 2 predictors:
 m7 &lt;- glm(high_use ~ sex + goout, data = alc, family = &quot;binomial&quot;)
 
@@ -629,7 +634,7 @@ loss_func(class=alc$high_use, prob=alc$probability7)</code></pre>
 <pre class="r"><code>#Testing error m7:
 cv &lt;- cv.glm(data=alc, cost=loss_func, glmfit = m7, K=10)
 cv$delta[1]</code></pre>
-<pre><code>## [1] 0.2434555</code></pre>
+<pre><code>## [1] 0.2356021</code></pre>
 </div>
 </div>
 
