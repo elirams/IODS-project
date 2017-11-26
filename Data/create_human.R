@@ -1,5 +1,5 @@
 # Name: Elisabet Rams 
-# Date: 16/11/2017
+# Date: 26/11/2017
 # File description: Exercise 4
 # Source of the data: Introduction to Open Data Science course through MOOC.
 
