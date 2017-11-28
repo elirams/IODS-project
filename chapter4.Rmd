@@ -4,12 +4,12 @@ In this chapter we will learn how to classify data using linear discriminant ana
 
 ### 3.1 Description and overview of the data
 
-install.packages("MASS")
-library(MASS)
+
 
 We will use the dataset called Boston from the MASS package. The data has 506 observations from 14 variables. The dataset gives different housing values in suburbs of Boston. E.g.: per capita crime rate by town, proportion of industries per town, nitrogen oxides concentration, etc. More information about the data can be found here: <https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/Boston.html>
 
 ```{r boston}
+library(MASS)
 str(Boston)
 dim(Boston)
 ```
@@ -188,19 +188,6 @@ summary(dist_eu)
 
 Then we run the k-means algorithm on the dataset. First we put a random number of clusters or initial cluster centers.
 
-```{r remove NA obs}
-row.has.na <- apply(boston_scaled2, 1, function(x){any(is.na(x))})
-sum(row.has.na)
-boston_scaled2 <- boston_scaled2[!row.has.na,]
-
-row.has.nan <- apply(boston_scaled2, 1, function(x){any(is.nan(x))})
-sum(row.has.nan)
-boston_scaled2 <- boston_scaled2[!row.has.nan,]
-
-row.has.inf <- apply(boston_scaled2, 1, function(x){any(is.infinite(x))})
-sum(row.has.inf)
-boston_scaled2 <- boston_scaled2[!row.has.inf,]
-```
 ```{r km}
 km <- kmeans(boston_scaled2, centers = 3)
 ```
@@ -215,13 +202,13 @@ set.seed(123)
 k_max <- 10
 
 # calculate the total sum of squares:
-twcss <- sapply(1:k_max, function(k){kmeans (boston_scaled2, k)$tot.wthinss})
+twcss <- sapply(1:k_max, function(k){kmeans (boston_scaled2, k)$tot.withinss})
 
 # see graphically the optimal number of clusters:
-qplot(x = 1:k_max, y= twcss, geom = 'line')
+qplot(x = 1:k_max, y = twcss, geom = 'line')
 ```
 
-From the above graph we can prove how the optimal number of clusters is 2. Soo we run the k means algorithm again and visualize the results. First we see a matrix with all the variables and then zoomed for variables from 1 to 5 and from 6 to 10.
+From the above graph we can prove how the optimal number of clusters is 2. Soo we run the k means algorithm again and visualize the results. First we see a matrix with all the variables and then zoomed for variables from 1 to 5 and from 6 to 10. On the following graphics we can observe the two clusters on the data, in red and black, and how they relate for each combination of variables
 
 ```{r km2}
 km <- kmeans(boston_scaled2, centers = 2)
@@ -246,7 +233,7 @@ summary(boston_scaled3)
 
 Then we perform k-means.
 
-```{r km2}
+```{r km2.2}
 km2 <- kmeans(boston_scaled3, center = 3)
 
 boston_scaled3 <- as.data.frame(boston_scaled3)
@@ -295,12 +282,11 @@ matrix_product <- as.data.frame(matrix_product)
 ```
 
 
-install.packages("plotly")
-library(plotly)
 
 Then we draw a plot.
 
 ```{r 3d plot1}
+library(plotly)
 plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers')
 ```
 
@@ -312,12 +298,11 @@ plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, 
 
 Finally, we draw the same plot but now setting the colors to be the clusters of the k-means.
 
-```{r 3d plot3}
-
+{r 3d plot3}
 plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers', color = km$cluster)
-```
 
-In the second plot we can identify which observations belong to which crime classes and we can observe there is some kind of clustering within classes, especially with the class high, there is a clear cluster. The rest are not as clear.
 
-In the last graphic we can actually observe the graphic where each color is a cluster, and as we could have guessed, the optimal is only 2 clusters. One for high and another one for the rest of crime classes.
+In the second graphic we can identify which observations belong to which crime classes and we can observe there is some kind of clustering within classes, especially with the class high, there is a clear cluster. The rest are not as clear.
+
+In the last graphic we should observe the graphic where each color is a cluster, and as we could have guessed, the optimal is only 2 clusters. One for high and another one for the rest of crime classes. For some reason we could not proceed to draw this graphic.
 
