@@ -1,0 +1,186 @@
+# Chapter 5. Dimensionality reduction techniques
+
+In many cases, datsets contain huge amount of variables which are difficult to interpret. With dimensionality reduction techniques we can reduce the amount of variables so it is easy to interpret the data. In this chapter we will use two of the must used techniques, PCA (Principal Component Analysis) and MCA (Multiple Correspondance Analysis).
+
+### Overview of the data
+
+The data used for this exercise originates from the United Nations Development Programme. For more informartion about the data you can visit : <http://hdr.undp.org/en/content/human-development-index-hdi>
+
+First we load the data and explore its structure and dimensions. We can see the data has 155 observations of 8 variables. 
+
+We have the following variables in our dataset:
+
+* ratio.edu2 -> Ratio of female vs male population with at least secondary education
+* ratio.labforce -> Ratio of female vs male population in the labour force
+* yr.eduexp -> Expected years of schooling
+* lifexp -> Life expectancy at birth
+* GNI -> Gross National Income per capita
+* matermor -> Maternal mortality ratio
+* adobirth -> Adolescent birth rate
+* repreparl -> Percetange of female representatives in parliament
+
+```{r overview human}
+
+human <- read.table(file="C:/Users/Elisabet/Desktop/ELI/MASTER'S DEGREE/Open Data Science/GitHub/IODS-project/IODS-project/Data/human.csv", header = TRUE, row.names = 1)
+str(human)
+
+str(human)
+dim(human)
+```
+
+### Graphical overview of the data
+
+
+
+First we can see in the summaries that both ratio of female vs male with at least secondary school and in the labour force are under 1, meaning that there is higher amount of men with at least secondary school and more man in the labour force. The average years of expected schooling is 13 years and the average life expectancy at birth is 71.7 years. Mean GNI per capita is 17 628USD.
+
+Maternal mortality ratio has minimum of 1 and a maximum of 1100 deaths per 100,000 births. The rationale is that countries where maternal mortality ratios exceed 1 000 they are not capable to make a difference by supporting maternal health. The mean is 149.
+
+Adolescent birth rate, so adolescent pregnancies are in average 47 births per 1 000 women ages 15-19.
+
+Finally, percetange of female representatives in parliament is in average 21% with a maximum of 57.5%.
+```{r summary human}
+
+summary(human)
+```
+
+A good way of visualizing the distributions of the variables is using the ggpairs function.
+
+We can observe for example that the big majority of countries is on the low maternal mortality, which is definetely good news. On the other hand most of countries are in the lower end of GNI. The years of expected schooling follows pretty much a normal distribution and even slightly skewed to the more years of schooling, which seems very positive. Life expectancy at birth is skewed to more years of life expectancy at birth but still there is big amount of countries with less than 60 years.
+
+{r ggpairs human}
+```{r ggpairs human}
+library(GGally)
+ggpairs(human)
+```
+
+We can also explore the relationships between varibles using a correlation matrix. In the previous correlation numbers and in the following matrix we can see that obviously life expectancy at birth and maternal mortality are strongly and negatively correlated. Also maternal mortality is strongly and negatively correlated with secondary education ratio and years of expected education, which strongly supports the fact of education being an essential tool to avoid deaths at birth. It is also good to see how life expectancy is positively correlated with years of expected education.
+
+```{r corrplot human}
+library(corrplot)
+humancor <- cor(human)
+corrplot(humancor)
+```
+
+### Principal component analysis (PCA)
+
+PCA transforms the data to less dimensions (new features) which are called principal components(PC). In PCA, the first PC captures the maximum amount of variance from the features in the original data. The second PC is not correlated with the first one and it captures the maximum amount of variability left. And so on, all the PC are uncorrelated to each other and each is less important than the previous one in terms of variability.
+
+So now we will apply PCA on the not standardized human data.
+
+```{r PCA human not standardized}
+pca_human <- prcomp(human)
+
+```
+
+We look at the variability captured by the principal components. It is pretty clear that all variability is captured completely by the first principal component.
+```{r var PC}
+
+s <- summary(pca_human)
+s
+
+pca_pr <- round(100*s$importance[2,], digits=1)
+pca_pr
+```
+
+Then we draw a biplot displaying the observations by the two first principal components. We can observe on the graphic below how the GNI variable is strongly contributing to the first principal component.
+
+```{r biplothuman}
+biplot(pca_human, choices = 1:2, cex = c(0.6, 1))
+
+```
+
+Now we will do the same as we just did but first we will standardize the data.
+
+Unlike LDA, PCA has no target variable. PCA is sensitive to the original scaling of the original features (=variables). And it assumes that features with higher variance are more important than the ones with less variance. That is why standardization is advisable before performing the analysis. So let's see if we can get more clear and visible results after scaling the data.
+
+So now, with the scaled data, the first principal component captures 53% of the variability, the second captures 16%, the third 9.6%, etc. Which seems much more reasonable, that the variability is more distributed among the PC and not only to the first one as it happened on the previous PCA.
+
+```{r PCA standardized human}
+
+human <- scale(human)
+pca_human <- prcomp(human)
+
+s <- summary(pca_human)
+s
+pca_pr <- round(100*s$importance[2,], digits=1)
+pca_pr
+
+```
+
+Let's draw the biplot with the scaled data, now it is much more visible the contribution of each of the variables. And it seems logical that all variables contribute to the analysis, not only one. 
+
+In the biplot graphic, the observations are located in a scattered plot placed on x and y coordinates defined by the two first PC (in this case). And it shows the original variables and their relationships with both each other and the principal components. The angle between features shows the correlation between features and so smaller angle, higher positive correlation. The angle between features and PC axis show the correlation between the two of them. The lenght of the arrows is proportional to the SD of the features.
+
+So we can observe how representation in the parlament is positively correlated with ratio of labour force; expected years of education, ratio of secondary education and life expectancy are positively correlated; and adolescent births and maternal mortality are positively correlated. On the other hand, adolescent birth together with maternal mortality are negativerly correlated to expected years of education, ratio education, GNI and life expectancy. 
+
+On the one hand, the variables maternal mortality, adolescent birth, years of expected education, ratio of secondary education and life expectancy are contributing to the first principal component. On the other hand, the variables ratio of labour force and percentage of female representatives in the parliament are contributing to the second principal component.
+
+Almost all variables are contributing equally to the PC1 and PC2, only years of expected education and life expectancy have slightly higher contribution.
+
+```{r biplot scaled}
+biplot(pca_human, choices = 1:2, cex = c(0.6, 0.9))
+```
+
+We can also draw a biplot showing the variability captured by the first two components in the axis labels. And change the colors.
+
+```{r biplot PCA stand}
+pca_lab <- paste0(names(pca_pr), "(", pca_pr, "%)")
+biplot(pca_human, cex = c(0.6, 1), col=c("grey40", "deeppink2"), xlab= pca_lab[1], ylab = pca_lab[2])
+```
+
+### Multiple correspondance analysis
+
+MCA analyses the pattern of relationships of several categorical variables. Also continuous variables can be used as background (supplementary) variables. MCA can be used with qualitative data and it uses frequencies. MCA has little assumptions about the variables of the data.
+
+We will use the dataset tea in order to use MCA. So let's first visualize the distributions of the variables and explore briefly the dataset.
+
+The tea dataset has 300 observations of 36 variables. It is a dataset with information about tea drinking habits, for example if the people that has responded the questionnaires takes tea on breakfast, lunch or dinner, if they drink with friends or not, which type of tea, if they add or not sugar, etc.
+
+
+```{r load tea}
+library(FactoMineR)
+data("tea")
+str(tea)
+dim(tea)
+
+```
+
+To make it easier for the analysis we will select few variables of the data set and look at their distributions. Most of the interviewees do not have tea at lunch, most of them uses tea bags and most of them drink it alone without adding any lemon of milk. They mainly drink earl grey and it is almost fifty-fifty if they put sugar or not. Most of them gets their tea in the chain stores.
+
+
+
+```{r dist tea}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
+tea_time <- select(tea, one_of(keep_columns))
+
+
+gather(tea_time) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+
+```
+
+
+Now we will apply MCA on the tea data. The eigenvalues show the variances and percentage of the variances by each dimension, so the first dimension captures 15% of the variance of the data.
+
+Then we can see the individuals table: the individual coordinates, the contribution in percentage on the dimension and the squared correlations (=cos2) on the dimensions. So the individual 1 contribute 0.11 to the dimension 1, 0.14 to dimension 2 and 0.16 to dimension 3.
+
+The categories shows the coordinates of the variable categories, the contribution (%), the cos2 and the v.test value. This last one follows the normal distributions and is it is higher or lower than + or - 1.96 it means that the coordinate is significantly different from 0. We can see how all of the categories do.
+
+In the categorical variables we can see the squarred correlation between each variable and the dimensions. So if it is close to 1, it shows strong link with variable and dimension. For example "how" and "where" has 0.7 to dimension 1 so they are quite strongly related.
+
+```{r MCA tea}
+mca <- MCA(tea_time, graph = FALSE)
+summary(mca)
+```
+
+Finally we will draw a MCA factor map where the variables are draw on the first 2 dimensions so we can visualize the possible variable patterns. The distance between the variable categories gives a measure of their similarity. Very close = very similar.
+
+```{r plot mca}
+plot(mca, invisible = "ind", habillage = "quali")
+plot(mca, invisible = "var", habillage = "quali")
+
+
+```

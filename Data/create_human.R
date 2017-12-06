@@ -1,6 +1,6 @@
 # Name: Elisabet Rams 
-# Date: 26/11/2017
-# File description: Exercise 4
+# Date: 02/12/2017
+# File description: Exercise 4 & 5
 # Source of the data: Introduction to Open Data Science course through MOOC.
 
 # We read the data files:
@@ -30,7 +30,7 @@ colnames(hd)[3] <- "HDI"
 colnames(hd)[4] <- "lifexp"
 colnames(hd)[5] <- "yr.eduexp"
 colnames(hd)[6] <- "meanyr.edu"
-colnames(hd)[7] <- "GNI.cap"
+colnames(hd)[7] <- "GNI"
 colnames(hd)[8] <- "GNIrank-HDIrank"
 
 
@@ -69,6 +69,63 @@ glimpse(human)
 # Save the new dataset:
 
 setwd("C:/Users/Elisabet/Desktop/ELI/MASTER'S DEGREE/Open Data Science/GitHub/IODS-project/IODS-project/Data")
-write.table(human, file = "human.csv", sep = ",", col.names = TRUE)
+write.table(human, file = "human.csv", sep = ",", col.names = TRUE, row.names = FALSE)
 
 
+## SECOND PART ##
+
+setwd("C:/Users/Elisabet/Desktop/ELI/MASTER'S DEGREE/Open Data Science/GitHub/IODS-project/IODS-project/Data")
+
+human <- read.table("human.csv", header = TRUE, sep = ",")
+str(human)
+
+
+# We mutate the data transforming the GNI variable to numeric. But first we must transform the comma separating the thousands so R would be able to read it properly.
+
+install.packages("stringr")
+library(stringr)
+library(dplyr)
+
+human <- mutate(human, GNI = str_replace(human$GNI, pattern = ",", replace = "") %>% as.numeric())
+human$GNI
+
+# We want to keep only few variables in:
+
+keep <- c("country", "ratio.edu2", "ratio.labforce", "yr.eduexp", "lifexp", "GNI", "matermor", "adobirth", "repreparl")
+human <- select(human, one_of(keep))
+
+# Remove all rows with missing values:
+complete.cases(human)
+data.frame(human, comp = complete.cases(human))
+human_ <- filter(human, complete.cases(human))
+
+str(human_)
+
+# Remove observations which relate to regions instead of countries:
+tail(human_, n= 10)
+
+# It seems that the last 7 observations from human has regions instead of countries, so we should remove the last 7 observations.
+# First we identify with a new object the last 7 observations and then we select everything except those last 7 observations.
+
+last <- nrow(human_) - 7
+
+human_ <- human_[1:last,]
+
+# We define the row names of the data by the country names.
+
+rownames(human_) <- human_$country
+
+# We remove the country name column from the data.
+
+human_ <- select(human_, -country)
+
+str(human_)
+glimpse(human_)
+
+# Finally, we save overwriting the previous human.csv file.
+setwd("C:/Users/Elisabet/Desktop/ELI/MASTER'S DEGREE/Open Data Science/GitHub/IODS-project/IODS-project/Data")
+
+write.table(human_, file = "human.csv", sep = " ", col.names = TRUE, row.names = TRUE)
+
+human <- read.table(file="human.csv", header = TRUE, row.names = 1)
+str(human)
